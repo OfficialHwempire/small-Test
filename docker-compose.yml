@@ -1,0 +1,82 @@
+# docker compose 파일 형식의 버전. 대부분 3.8을 많이 사용
+version: '3.8' # 실행할 여러 컨테이너들을 정의
+services:
+  app:
+    build: #이미지를 직접 만들 때 사용
+      context: . #현재 경로에서 빌드할 거야
+      dockerfile: Dockerfile # 어떤 도커파일을 쓸지 명시
+    container_name: my-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      #DOCKER COMPOSE 에서는 컨테이너 이름뿐만 아니라 SERVICE의 이름으로도 컨테이너를 지목할 있음
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      #JVM 메모리 설정
+      - JAVA_OPTS="-Xmx400m -Xms200m"
+    depends_on: # 서비스 시작 순서 제어
+      postgres:
+        condition: service_healthy #postgres가 health check를 통과할 때까지 대기
+      redis:
+        condition: service_started #health check와 상관 없이 단순 컨테이너가 시작하기만 하면 됨
+    networks:
+      - my-network
+
+  postgres:
+    image: postgres:16
+    container_name: my-postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - my-postgres-data:/var/lib/postgresql/data
+    command: >
+      postgres 
+      -c shared_buffers=128MB 
+      -c max_connections=50
+
+    healthcheck: ##컨테이너가 정상적인지 주기적으로 호가인
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"] #헬스 체크를 위해 실행한 명령어
+      interval: 10s #10초마다 체크
+      timeout: 5s # 5초 안에 응답 없으면 unhealthy
+      retries: 5 # 5번 실해하면 unhealthy 상태로 판정
+    networks:
+      - my-network
+
+  redis:
+    image: redis:7.0.0-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 100mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - my-network
+
+#볼륨 정의
+volumes:
+  my-postgres-data:
+    driver: local #볼륨 데이터를 호스트의 로컬에 저장하겠다.
+  redis-data:
+    driver: local
+
+#네트워크 설정
+# 컨테이너 간의 상호 작용을 위한 네크워크를 정의합니다.
+networks:
+  my-network:
+    driver: bridge
+
+
+
+
