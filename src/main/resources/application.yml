@@ -6,7 +6,7 @@ spring:
     url: jdbc:postgresql://hwempire-postgres-db.c5k0u4saueos.ap-northeast-2.rds.amazonaws.com:5432/postgres
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: En12hw34!!
+    password: ${DB_PASSWORD}
 
   h2:
     console:
@@ -25,8 +25,8 @@ spring:
   cloud:
     aws:
       credentials:
-        access-key: AKIATEXE7OXYIXLXTNNQ
-        secret-key: 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
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
       region:
         static: ap-northeast-2
       s3:
@@ -52,7 +52,7 @@ spring:
       on-profile: docker
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${SPRING_DATASOURCE_URL}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    username: ${SPRING_DATASOURCE_USERNAME}
+    url: jdbc:postgresql://postgres:5432/postgres
+    password: postgres
+    username: postgres
 
