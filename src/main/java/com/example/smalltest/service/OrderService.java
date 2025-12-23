@@ -23,7 +23,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
-    private final S3FileService s3FileService;
+    private final S3PrivateFileService s3PrivateFileService;
 
 
     public OrderResponse createOrder(OrderCreateRequest orderCreateRequest, MultipartFile file) {
@@ -44,7 +44,11 @@ public class OrderService {
         try {
             //이 url을 db에 회원정보와 함께 저장 하세용
             // 나중에 프론트에서 회원 정보를 요청할 때 url 도 같이 전달
-            String url = s3FileService.uploadToS3Bucket(file);
+
+            //만약 presigned url을 사용한다면 굳이 DB에 url을 저장할 필요가 없습니다.
+            // 파일명(객체 Key)을 DB에 저장하세요. 그리고 데이터를 불러올 일이 있다면 그때마다
+            //presigned url을 얻어내서 프론트 쪽에 전달하세요.
+            String url = s3PrivateFileService.uploadToS3Bucket(file);
         } catch (IOException e) {
 
             throw new RuntimeException(e);

@@ -1,0 +1,39 @@
+name: Deploy to AWS
+on:
+  push:
+    branches:
+      - main
+      #main 브랜치에 코드가 올라오면 작업시작
+
+#워크 플로우에서 실행될 작업을 정의
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-22.04 # 작업이 실행될 환경을 정의
+
+    steps:
+      # 1. 코드 체크아웃 (깃 허브 코드를 actions 작업 환경으로 가져오기)
+      - name: Checkout code
+        uses: actions/checkout@v4
+      # 2. JAVA 설치
+      - name: Set up JDK 17
+        uses: actions/setup-jav
+
+          # 3. Gradle 캐싱 (빌드 속도 향상)
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+                  path: |
+                    ~/.gradle/caches
+                    ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+                  restore-keys: |
+                    ${{ runner.os }}-gradle-
+      - name: Build with Gradle
+        uses: chmod +x ./gradlew
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}

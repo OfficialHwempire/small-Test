@@ -33,4 +33,4 @@ ENTRYPOINT ["java" , "-jar" , "app.jar"]
 # 스프링 부트는 무조건 -jar 옵션으로 실행되어야 하기에 ENTRYPOINT로 안전하게 선언.
 
 ENV TZ=Asia/Seoul
-RUN apk add --no-cache tzdata
+RUN apk add --no-cache curl tzdata
