@@ -44,7 +44,9 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build with Gradle
-        uses: chmod +x ./gradlew ./gradlew clean build -x test
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
