@@ -70,7 +70,6 @@ jobs:
             # 다음 스텝에서 사용할 수 있도록 출력
             echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      #8 현재 테스크 definition download
       - name: Download current task definition
         run: |
             aws ecs describe-task-definition \
